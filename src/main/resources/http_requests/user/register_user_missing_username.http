@@ -1,0 +1,12 @@
+### Register with Invalid Email
+POST http://localhost:8088/v1/api/users
+Content-Type: application/json
+Authorization: Basic am9obl9kb2U6cGFzc3dvcmQxMjM=
+
+{
+  "username": "john_lennon",
+  "password": "password123",
+  "email": "john_lennon_auction.com",
+  "fullName": "John Lennon",
+  "roles": "user"
+}

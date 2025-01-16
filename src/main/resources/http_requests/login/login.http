@@ -1,0 +1,8 @@
+### Login Request
+POST http://localhost:8088/v1/api/login
+Content-Type: application/json
+
+{
+  "username": "jane_smith",
+  "password": "password123"
+}

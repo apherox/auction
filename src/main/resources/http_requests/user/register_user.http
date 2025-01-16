@@ -1,0 +1,12 @@
+### Register User
+POST http://localhost:8088/v1/api/users
+Content-Type: application/json
+Authorization: Basic am9obl9kb2U6cGFzc3dvcmQxMjM=
+
+{
+  "username": "jane_doe",
+  "password": "password123",
+  "email": "jane_doe@auction.com",
+  "fullName": "Jane Doe",
+  "roles": "admin"
+}

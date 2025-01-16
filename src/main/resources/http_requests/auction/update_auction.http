@@ -1,0 +1,12 @@
+### Update Auction
+PUT http://localhost:8088/v1/api/auctions/10
+Content-Type: application/json
+Authorization: Basic am9obl9kb2U6cGFzc3dvcmQxMjM=
+
+{
+  "title": "Hair dryer 10",
+  "description": "Hair dryer 10",
+  "startingPrice": 250.00,
+  "status": "CLOSED",
+  "expirationTime": "2025-01-16T15:00:00"
+}

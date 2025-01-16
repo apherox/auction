@@ -1,0 +1,3 @@
+### Find Auction by ID
+GET http://localhost:8088/v1/api/auctions/1
+Authorization: Basic am9obl9kb2U6cGFzc3dvcmQxMjM=

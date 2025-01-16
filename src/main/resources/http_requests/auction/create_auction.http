@@ -1,0 +1,11 @@
+### Create Auction
+POST http://localhost:8088/v1/api/auctions
+Content-Type: application/json
+Authorization: Basic am9obl9kb2U6cGFzc3dvcmQxMjM=
+
+{
+  "title": "Hair dryer",
+  "description": "Hair dryer",
+  "startingPrice": 150.00,
+  "expirationTime": "2025-01-19T16:15:00"
+}

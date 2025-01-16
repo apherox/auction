@@ -1,0 +1,41 @@
+CREATE SEQUENCE USER_ID_SEQ START WITH 1;
+
+CREATE TABLE IF NOT EXISTS users (
+    user_id BIGINT DEFAULT NEXTVAL('USER_ID_SEQ') PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    full_name VARCHAR(255) NOT NULL,
+    roles VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP
+);
+
+CREATE SEQUENCE AUCTION_ID_SEQ START WITH 1;
+
+CREATE TABLE IF NOT EXISTS auctions (
+    auction_id BIGINT DEFAULT NEXTVAL('AUCTION_ID_SEQ') PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
+    starting_price DECIMAL(10, 2) NOT NULL,
+    expiration_time TIMESTAMP NOT NULL,
+    status VARCHAR(10) DEFAULT 'OPEN' CHECK (status IN ('OPEN', 'CLOSED')),
+    highest_bid DECIMAL(10, 2),
+    highest_bid_user_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    version BIGINT,
+    FOREIGN KEY (highest_bid_user_id) REFERENCES users(user_id)
+);
+
+CREATE SEQUENCE BID_ID_SEQ START WITH 1;
+
+CREATE TABLE IF NOT EXISTS bids (
+    bid_id BIGINT DEFAULT NEXTVAL('BID_ID_SEQ') PRIMARY KEY,
+    auction_id INT NOT NULL,
+    user_id INT NOT NULL,
+    amount DECIMAL(10, 2) NOT NULL,
+    bid_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (auction_id) REFERENCES auctions(auction_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);

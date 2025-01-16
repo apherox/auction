@@ -1,0 +1,3 @@
+### Find User by Missing ID
+GET http://localhost:8088/v1/api/users/111
+Authorization: Basic am9obl9kb2U6cGFzc3dvcmQxMjM=

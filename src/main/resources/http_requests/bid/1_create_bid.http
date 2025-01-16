@@ -1,0 +1,9 @@
+### Create Bid
+POST http://localhost:8088/v1/api/auctions/10/bids
+Content-Type: application/json
+Authorization: Basic am9obl9kb2U6cGFzc3dvcmQxMjM=
+
+{
+  "amount": 350.00,
+  "userId": 1
+}

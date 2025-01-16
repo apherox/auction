@@ -1,0 +1,4 @@
+### Logout Request
+POST http://localhost:8088/v1/api/logout
+Content-Type: application/json
+Authorization: Basic am9obl9kb2U6cGFzc3dvcmQxMjM=
