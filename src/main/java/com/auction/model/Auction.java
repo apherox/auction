@@ -15,8 +15,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import java.time.LocalDateTime;
 
@@ -55,7 +53,6 @@ public class Auction {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "highest_bid_user_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
     @JsonIgnore
     private User highestBidUser;
 

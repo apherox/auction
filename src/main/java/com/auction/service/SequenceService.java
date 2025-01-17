@@ -21,16 +21,16 @@ public class SequenceService {
 
     @Transactional
     public void resetUserSequence() {
-        resetSequence("USER_ID_SEQ", 10);  // Reset the sequence to 4 (or any desired value)
+        resetSequence("USER_ID_SEQ", 10);
     }
 
     @Transactional
     public void resetAuctionSequence() {
-        resetSequence("AUCTION_ID_SEQ", 10);  // Reset the sequence to 4 (or any desired value)
+        resetSequence("AUCTION_ID_SEQ", 10);
     }
 
     @Transactional
     public void resetBidSequence() {
-        resetSequence("BID_ID_SEQ", 10);  // Reset the sequence to 4 (or any desired value)
+        resetSequence("BID_ID_SEQ", 10);
     }
 }

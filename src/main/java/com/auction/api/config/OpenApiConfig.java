@@ -16,7 +16,7 @@ public class OpenApiConfig {
                         .version("1.0")
                         .description("API documentation for the Auction Application")
                         .termsOfService("http://swagger.io/terms/")
-                        .contact(new io.swagger.v3.oas.models.info.Contact().name("Support Team").email("dimov.vlatko@gmail.com"))
+                        .contact(new io.swagger.v3.oas.models.info.Contact().name("Support Team").email("apherox@auction.com"))
                 );
     }
 }

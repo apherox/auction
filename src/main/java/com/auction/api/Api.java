@@ -14,7 +14,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Component
-@RequestMapping("${app.api.base-path}")
 public @interface Api {
     @AliasFor(annotation = Component.class)
     String value() default "";
