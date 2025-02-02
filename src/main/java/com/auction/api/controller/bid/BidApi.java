@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,5 +28,7 @@ public interface BidApi {
             }
     )
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<BidResponse> placeBid(@PathVariable Long auctionId, @RequestBody BidRequest bidRequest);
+    ResponseEntity<BidResponse> placeBid(Authentication authentication,
+                                         @PathVariable Long auctionId,
+                                         @RequestBody BidRequest bidRequest);
 }

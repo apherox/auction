@@ -13,8 +13,4 @@ public class BidRequest {
     @DecimalMin(value = "0.01", message = "Bid amount must be greater than zero.")
     @Schema(description = "Amount of the bid", example = "250.00")
     private Double amount;
-
-    @NotNull(message = "ID of the user is mandatory")
-    @Schema(description = "ID of the user", example = "123")
-    private Long userId;
 }

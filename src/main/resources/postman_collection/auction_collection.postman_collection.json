@@ -475,7 +475,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{   \n    \"title\": \"Hair dryer\",\n    \"description\": \"Hair dryer\",\n    \"startingPrice\": 150.00,\n    \"expirationTime\": \"2025-01-19T16:15:00\"\n}",
+							"raw": "{   \n    \"title\": \"Hair dryer\",\n    \"description\": \"Hair dryer\",\n    \"startingPrice\": 150.00,\n    \"expirationTime\": \"2025-11-19T16:15:00\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -571,7 +571,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8088/v1/api/auctions/1",
+							"raw": "http://localhost:8088/v1/api/auctions/10",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -581,7 +581,7 @@
 								"v1",
 								"api",
 								"auctions",
-								"1"
+								"10"
 							]
 						}
 					},
@@ -656,7 +656,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"amount\": 350.00,\n    \"userId\": 1\n}",
+							"raw": "{\n    \"amount\": 350.00\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -688,13 +688,13 @@
 							"type": "basic",
 							"basic": [
 								{
-									"key": "password",
-									"value": "password123",
+									"key": "username",
+									"value": "jane_smith",
 									"type": "string"
 								},
 								{
-									"key": "username",
-									"value": "john_doe",
+									"key": "password",
+									"value": "password123",
 									"type": "string"
 								}
 							]
@@ -709,7 +709,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"amount\": 351.00,\n    \"userId\": 2\n}",
+							"raw": "{\n    \"amount\": 390.00\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -735,19 +735,19 @@
 					"response": []
 				},
 				{
-					"name": "create_third_different_user",
+					"name": "create_third_different_user_lower_amount",
 					"request": {
 						"auth": {
 							"type": "basic",
 							"basic": [
 								{
-									"key": "password",
-									"value": "password123",
+									"key": "username",
+									"value": "alice_brown",
 									"type": "string"
 								},
 								{
-									"key": "username",
-									"value": "john_doe",
+									"key": "password",
+									"value": "password123",
 									"type": "string"
 								}
 							]
@@ -762,7 +762,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"amount\": 390.00,\n    \"userId\": 3\n}",
+							"raw": "{\n    \"amount\": 389.00\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -788,22 +788,10 @@
 					"response": []
 				},
 				{
-					"name": "create_fourth_fails_with_lower_amount",
+					"name": "create_bid_with_unauthenticated_user",
 					"request": {
 						"auth": {
-							"type": "basic",
-							"basic": [
-								{
-									"key": "password",
-									"value": "password123",
-									"type": "string"
-								},
-								{
-									"key": "username",
-									"value": "john_doe",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "POST",
 						"header": [
@@ -815,7 +803,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"amount\": 389.00,\n    \"userId\": 3\n}",
+							"raw": "{\n    \"amount\": 389.00\n}",
 							"options": {
 								"raw": {
 									"language": "json"

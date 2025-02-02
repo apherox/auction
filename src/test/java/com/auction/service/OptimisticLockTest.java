@@ -1,22 +1,25 @@
 package com.auction.service;
 
 import com.auction.api.model.bid.BidRequest;
-import com.auction.exception.AuctionOptimisticLockException;
 import com.auction.model.Auction;
 import com.auction.model.User;
 import com.auction.repository.AuctionRepository;
 import com.auction.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -33,6 +36,9 @@ class OptimisticLockTest extends AbstractServiceTest {
     @Autowired
     private BidService bidService;
 
+    @MockitoBean
+    private Authentication authentication;
+
     private User user;
     private BidRequest bidRequest;
 
@@ -47,12 +53,16 @@ class OptimisticLockTest extends AbstractServiceTest {
         userRepository.save(user);
 
         bidRequest = new BidRequest();
-        bidRequest.setUserId(user.getUserId());
         bidRequest.setAmount(12000.00);
+
+        UserDetails userDetails = Mockito.mock(UserDetails.class);
+        Mockito.when(userDetails.getUsername()).thenReturn(user.getUsername());
+        authentication = new UsernamePasswordAuthenticationToken(userDetails, user.getPassword());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     @Test
-    void testPlaceBid_shouldPlaceBidSuccessfully() {
+    void testPlaceBid_shouldThrowException() {
         // When
         Auction auction = mock(Auction.class);
 
@@ -64,12 +74,8 @@ class OptimisticLockTest extends AbstractServiceTest {
         when(auction.getStatus()).thenReturn("OPEN");
         doThrow(OptimisticLockingFailureException.class).when(auctionRepository).save(any(Auction.class));
 
-        AuctionOptimisticLockException exception = assertThrows(AuctionOptimisticLockException.class,
-                () -> bidService.placeBid(auction.getAuctionId(), bidRequest)
+        assertThrowsExactly(OptimisticLockingFailureException.class,
+                () -> bidService.placeBid(authentication, auction.getAuctionId(), bidRequest)
         );
-
-        assertEquals(
-                String.format("Bid failed due to concurrent updates on auction with id %d. Please retry",
-                        auction.getAuctionId()), exception.getMessage());
     }
 }

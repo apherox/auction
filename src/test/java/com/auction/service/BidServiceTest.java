@@ -10,17 +10,24 @@ import com.auction.model.Auction;
 import com.auction.model.AuctionStatus;
 import com.auction.model.User;
 import com.auction.repository.AuctionRepository;
-import com.auction.repository.BidRepository;
 import com.auction.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 class BidServiceTest extends AbstractServiceTest {
 
@@ -33,12 +40,15 @@ class BidServiceTest extends AbstractServiceTest {
     @Autowired
     private BidService bidService;
 
-    @Autowired
-    private BidRepository bidRepository;
+    @MockitoBean
+    private Authentication authentication;
 
     private Auction auction;
     private User user;
     private BidRequest bidRequest;
+
+    private static final String USERNAME = "test_user";
+    private static final String ROLE_ADMIN = "admin";
 
     @BeforeEach
     void setUp() {
@@ -59,14 +69,19 @@ class BidServiceTest extends AbstractServiceTest {
         userRepository.save(user);
 
         bidRequest = new BidRequest();
-        bidRequest.setUserId(user.getUserId());
         bidRequest.setAmount(12000.00);
+
+        UserDetails userDetails = Mockito.mock(UserDetails.class);
+        Mockito.when(userDetails.getUsername()).thenReturn(user.getUsername());
+        authentication = new UsernamePasswordAuthenticationToken(userDetails, user.getPassword());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     @Test
+    @WithMockUser(username = USERNAME, roles = ROLE_ADMIN)
     void testPlaceBid_shouldPlaceBidSuccessfully() {
         // When
-        BidResponse bidResponse = bidService.placeBid(auction.getAuctionId(), bidRequest);
+        BidResponse bidResponse = bidService.placeBid(authentication, auction.getAuctionId(), bidRequest);
 
         // Then
         assertNotNull(bidResponse);
@@ -78,53 +93,49 @@ class BidServiceTest extends AbstractServiceTest {
     @Test
     void testPlaceBid_shouldThrowExceptionWhenAuctionNotFound() {
         // When & Then
-        assertThrows(ResourceNotFoundException.class, () -> bidService.placeBid(999L, bidRequest));
-    }
-
-    @Test
-    void testPlaceBid_shouldThrowExceptionWhenUserNotFound() {
-        // Given non-existent user
-        bidRequest.setUserId(999L);
-
-        // When & Then
-        assertThrows(ResourceNotFoundException.class, () -> bidService.placeBid(auction.getAuctionId(), bidRequest));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        assertThrows(ResourceNotFoundException.class, () -> bidService.placeBid(authentication, 999L, bidRequest));
     }
 
     @Test
     void testPlaceBid_shouldThrowExceptionWhenAuctionTimeExpired() {
         // Given
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         auction.setExpirationTime(LocalDateTime.now().minusDays(1));
         auctionRepository.save(auction);
 
         // When & Then
-        assertThrows(AuctionTimeExpiredException.class, () -> bidService.placeBid(auction.getAuctionId(), bidRequest));
+        assertThrows(AuctionTimeExpiredException.class, () -> bidService.placeBid(authentication, auction.getAuctionId(), bidRequest));
     }
 
     @Test
     void testPlaceBid_shouldThrowExceptionWhenAuctionIsClosed() {
         // Given
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         auction.setStatus(AuctionStatus.CLOSED.name());
         auctionRepository.save(auction);
 
         // When & Then
-        assertThrows(AuctionClosedException.class, () -> bidService.placeBid(auction.getAuctionId(), bidRequest));
+        assertThrowsExactly(AuctionClosedException.class, () -> bidService.placeBid(authentication, auction.getAuctionId(), bidRequest));
     }
 
     @Test
     void testPlaceBid_shouldThrowExceptionWhenBidAmountIsLowerThanHighestBid() {
         // Given
+        SecurityContextHolder.getContext().setAuthentication(authentication);
         auction.setHighestBid(15000.00);
         auctionRepository.save(auction);
 
         // When & Then
         bidRequest.setAmount(14000.00);
-        assertThrows(InvalidBidException.class, () -> bidService.placeBid(auction.getAuctionId(), bidRequest));
+        assertThrowsExactly(InvalidBidException.class, () -> bidService.placeBid(authentication, auction.getAuctionId(), bidRequest));
     }
 
     @Test
     void testPlaceBid_shouldUpdateAuctionHighestBid() {
         // When
-        bidService.placeBid(auction.getAuctionId(), bidRequest);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        bidService.placeBid(authentication, auction.getAuctionId(), bidRequest);
 
         // Then
         Auction updatedAuction = auctionRepository.findById(auction.getAuctionId()).orElseThrow(RuntimeException::new);

@@ -4,7 +4,6 @@ import com.auction.api.model.ErrorResponse;
 import com.auction.exception.AuctionClosedException;
 import com.auction.exception.AuctionCreationException;
 import com.auction.exception.AuctionModificationException;
-import com.auction.exception.AuctionOptimisticLockException;
 import com.auction.exception.AuctionTimeExpiredException;
 import com.auction.exception.AuthenticationException;
 import com.auction.exception.BidCreationException;
@@ -128,12 +127,6 @@ public class ControllerExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException e) {
 		log.error("AuthenticationException received, message: {}", e.getMessage());
 		return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.UNAUTHORIZED);
-	}
-
-	@ExceptionHandler(AuctionOptimisticLockException.class)
-	public ResponseEntity<ErrorResponse> handleAuctionOptimisticLockException(AuctionOptimisticLockException e) {
-		log.warn("AuctionOptimisticLockException received, message: {}", e.getMessage());
-		return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.CONFLICT);
 	}
 
 	@ExceptionHandler(UserCreationException.class)

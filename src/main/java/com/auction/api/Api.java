@@ -2,7 +2,6 @@ package com.auction.api;
 
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

@@ -17,6 +17,7 @@ public class UserResponse {
 
     @NotBlank(message = "Username is mandatory.")
     @Schema(description = "Username of the user", example = "john_doe")
+    @Pattern(regexp = "^[a-zA-Z0-9._]{1,30}$", message = "Username must contain only letters, digits, underscores, and dots")
     private String username;
 
     @NotBlank(message = "Email is mandatory.")

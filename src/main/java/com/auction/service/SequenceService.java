@@ -26,7 +26,7 @@ public class SequenceService {
 
     @Transactional
     public void resetAuctionSequence() {
-        resetSequence("AUCTION_ID_SEQ", 10);
+       resetSequence("AUCTION_ID_SEQ", 10);
     }
 
     @Transactional
