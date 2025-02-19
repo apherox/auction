@@ -2,17 +2,21 @@ package com.auction.service;
 
 import com.auction.api.model.user.UserRequest;
 import com.auction.api.model.user.UserResponse;
+import com.auction.exception.InvalidRoleException;
 import com.auction.exception.ResourceNotFoundException;
 import com.auction.exception.UserConflictException;
 import com.auction.exception.UserCreationException;
 import com.auction.mapper.UserMapper;
+import com.auction.model.Role;
 import com.auction.model.User;
+import com.auction.repository.RoleRepository;
 import com.auction.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,12 +24,14 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final SequenceService sequenceService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, SequenceService sequenceService) {
+    public UserService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, SequenceService sequenceService) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.userMapper = UserMapper.INSTANCE;
         this.passwordEncoder = passwordEncoder;
         this.sequenceService = sequenceService;
@@ -42,8 +48,16 @@ public class UserService {
                 .map(passwordEncoder::encode)
                 .ifPresent(userRequest::setPassword);
 
-        return Optional.of(userRequest)
-                .map(userMapper::toUserEntity)
+        List<String> roleNames = userRequest.getRoles();
+        List<Role> roles = roleRepository.findByRoleNameIn(roleNames);
+        if (roles.size() != roleNames.size()) {
+            throw new InvalidRoleException("One or more specified roles are invalid.");
+        }
+
+        User user = userMapper.toUserEntity(userRequest);
+        user.setRoles(roles);
+
+        return Optional.of(user)
                 .map(userRepository::save)
                 .map(savedUser -> {
                     log.info("Created user with username: {}", userRequest.getUsername());
@@ -77,3 +91,5 @@ public class UserService {
         sequenceService.resetUserSequence();
     }
 }
+
+

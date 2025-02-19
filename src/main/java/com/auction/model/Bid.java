@@ -14,7 +14,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "bids")
+@Table(name = "bid")
 @Data
 public class Bid {
 

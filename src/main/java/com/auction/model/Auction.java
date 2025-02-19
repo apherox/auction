@@ -19,7 +19,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "auctions")
+@Table(name = "auction")
 @Data
 public class Auction {
 

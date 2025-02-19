@@ -8,5 +8,5 @@ Authorization: Basic am9obl9kb2U6cGFzc3dvcmQxMjM=
   "password": "password123",
   "email": "john_lennon_auction.com",
   "fullName": "John Lennon",
-  "roles": "user"
+  "roles": ["user"]
 }

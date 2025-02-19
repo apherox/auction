@@ -7,7 +7,9 @@ import com.auction.api.model.user.UserRequest;
 import com.auction.api.model.user.UserResponse;
 import com.auction.model.Auction;
 import com.auction.model.AuctionStatus;
+import com.auction.model.Role;
 import com.auction.repository.AuctionRepository;
+import com.auction.repository.RoleRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -40,6 +44,9 @@ class BidControllerTest  extends AbstractControllerTest {
     @Autowired
     private AuctionRepository auctionRepository;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     @MockitoBean
     private Authentication authentication;
 
@@ -51,12 +58,21 @@ class BidControllerTest  extends AbstractControllerTest {
 
     @BeforeEach
     public void setup() throws Exception {
+
+        Role adminRole = new Role();
+        adminRole.setRoleName("admin");
+        roleRepository.save(adminRole);
+
+        Role userRole = new Role();
+        userRole.setRoleName("user");
+        roleRepository.save(userRole);
+
         UserRequest userRequest = new UserRequest();
         userRequest.setUsername(USERNAME);
         userRequest.setPassword(PASSWORD);
         userRequest.setEmail("john.doe@auction.com");
         userRequest.setFullName("John Doe");
-        userRequest.setRoles("admin");
+        userRequest.setRoles(Collections.singletonList("admin"));
 
         String userJson = objectMapper.writeValueAsString(userRequest);
 
@@ -67,7 +83,8 @@ class BidControllerTest  extends AbstractControllerTest {
                 .andExpect(jsonPath("$.username").value(userRequest.getUsername()))
                 .andExpect(jsonPath("$.email").value(userRequest.getEmail()))
                 .andExpect(jsonPath("$.fullName").value(userRequest.getFullName()))
-                .andExpect(jsonPath("$.roles").value(userRequest.getRoles()))
+                .andExpect(jsonPath("$.roles").value(hasSize(1)))
+                .andExpect(jsonPath("$.roles[0]").value("admin"))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
@@ -188,7 +205,7 @@ class BidControllerTest  extends AbstractControllerTest {
         secondUserRequest.setPassword("password123");
         secondUserRequest.setEmail("jim_carrey@auction.com");
         secondUserRequest.setFullName("Jim Carrey");
-        secondUserRequest.setRoles("user");
+        secondUserRequest.setRoles(Collections.singletonList("user"));
 
         String userJson = objectMapper.writeValueAsString(secondUserRequest);
 
@@ -199,7 +216,8 @@ class BidControllerTest  extends AbstractControllerTest {
                 .andExpect(jsonPath("$.username").value(secondUserRequest.getUsername()))
                 .andExpect(jsonPath("$.email").value(secondUserRequest.getEmail()))
                 .andExpect(jsonPath("$.fullName").value(secondUserRequest.getFullName()))
-                .andExpect(jsonPath("$.roles").value(secondUserRequest.getRoles()))
+                .andExpect(jsonPath("$.roles").value(hasSize(1)))
+                .andExpect(jsonPath("$.roles[0]").value("user"))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();

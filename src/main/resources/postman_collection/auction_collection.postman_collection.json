@@ -192,7 +192,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"jane_doe\",\n    \"password\": \"password123\",\n    \"email\": \"jane_doe@auction.com\",\n    \"fullName\": \"Jane Doe\",\n    \"roles\": \"admin\"\n}",
+							"raw": "{\n    \"username\": \"jane_doe\",\n    \"password\": \"password123\",\n    \"email\": \"jane_doe@auction.com\",\n    \"fullName\": \"Jane Doe\",\n    \"roles\": [\"admin\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -243,7 +243,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"password\": \"password123\",\n    \"email\": \"janis_joplin@auction.com\",\n    \"fullName\": \"Jane Doe\",\n    \"roles\": \"user\"\n}",
+							"raw": "{\n    \"password\": \"password123\",\n    \"email\": \"janis_joplin@auction.com\",\n    \"fullName\": \"Jane Doe\",\n    \"roles\": [\"user\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -294,7 +294,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"jack_dorsey\",\n    \"email\": \"jack_dorsey@auction.com\",\n    \"fullName\": \"Jack Dorsey\",\n    \"roles\": \"user\"\n}",
+							"raw": "{\n    \"username\": \"jack_dorsey\",\n    \"email\": \"jack_dorsey@auction.com\",\n    \"fullName\": \"Jack Dorsey\",\n    \"roles\": [\"user\"]\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -345,7 +345,109 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"john_lennon\",\n    \"password\": \"password123\",\n    \"email\": \"john_lennon_auction.com\",\n    \"fullName\": \"John Lennon\",\n    \"roles\": \"user\"\n}",
+							"raw": "{\n    \"username\": \"john_lennon\",\n    \"password\": \"password123\",\n    \"email\": \"john_lennon_auction.com\",\n    \"fullName\": \"John Lennon\",\n    \"roles\": [\"user\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8088/v1/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"v1",
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "register_with_missing_role",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "john_doe",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"john_lennon\",\n    \"password\": \"password123\",\n    \"email\": \"john_lennon@auction.com\",\n    \"fullName\": \"John Lennon\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8088/v1/api/users",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"v1",
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "register_with_invalid_role Copy",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "password123",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "john_doe",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"john_lennon\",\n    \"password\": \"password123\",\n    \"email\": \"john_lennon@auction.com\",\n    \"fullName\": \"John Lennon\",\n    \"roles\": \"admina\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"

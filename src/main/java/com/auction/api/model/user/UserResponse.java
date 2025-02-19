@@ -3,10 +3,12 @@ package com.auction.api.model.user;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Schema(description = "User response model")
@@ -29,10 +31,9 @@ public class UserResponse {
     @Schema(description = "Full name of the user", example = "John Doe")
     private String fullName;
 
-    @NotBlank(message = "Roles is mandatory.")
-    @Schema(description = "Roles of the user", example = "USER")
-    @Pattern(regexp = "^(user|admin)(,\\s*(user|admin))*$", message = "Roles must be a comma-separated list of 'user' and 'admin'.")
-    private String roles;
+    @NotEmpty(message = "Roles is mandatory.")
+    @Schema(description = "Roles of the user", example = "[\"user\", \"admin\"]")
+    private List<String> roles;
 
     @Schema(description = "Timestamp of the creation of the user", example = "2021-03-24 16:34:26.666")
     private LocalDateTime createdAt;

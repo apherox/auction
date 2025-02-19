@@ -7,22 +7,24 @@ import com.auction.exception.AuctionTimeExpiredException;
 import com.auction.exception.InvalidBidException;
 import com.auction.exception.ResourceNotFoundException;
 import com.auction.model.Auction;
-import com.auction.model.AuctionStatus;
+import com.auction.model.Role;
 import com.auction.model.User;
 import com.auction.repository.AuctionRepository;
+import com.auction.repository.RoleRepository;
 import com.auction.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -38,20 +40,27 @@ class BidServiceTest extends AbstractServiceTest {
     private UserRepository userRepository;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
     private BidService bidService;
 
-    @MockitoBean
+    @Mock
     private Authentication authentication;
 
     private Auction auction;
     private User user;
     private BidRequest bidRequest;
 
-    private static final String USERNAME = "test_user";
-    private static final String ROLE_ADMIN = "admin";
+    private static final String USERNAME = "johndoe";
+    private static final String ROLE_USER = "user";
 
     @BeforeEach
     void setUp() {
+        Role userRole = new Role();
+        userRole.setRoleName(ROLE_USER);
+        roleRepository.save(userRole);
+
         auction = new Auction();
         auction.setTitle("Vintage Car");
         auction.setDescription("A classic vintage car");
@@ -61,16 +70,17 @@ class BidServiceTest extends AbstractServiceTest {
         auctionRepository.save(auction);
 
         user = new User();
-        user.setUsername("johndoe");
+        user.setUsername(USERNAME);
         user.setPassword("password123");
         user.setEmail("johndoe@example.com");
         user.setFullName("John Doe");
-        user.setRoles("USER");
+        user.setRoles(Collections.singletonList(userRole));
         userRepository.save(user);
 
         bidRequest = new BidRequest();
         bidRequest.setAmount(12000.00);
 
+        // Mock the authentication process
         UserDetails userDetails = Mockito.mock(UserDetails.class);
         Mockito.when(userDetails.getUsername()).thenReturn(user.getUsername());
         authentication = new UsernamePasswordAuthenticationToken(userDetails, user.getPassword());
@@ -78,7 +88,6 @@ class BidServiceTest extends AbstractServiceTest {
     }
 
     @Test
-    @WithMockUser(username = USERNAME, roles = ROLE_ADMIN)
     void testPlaceBid_shouldPlaceBidSuccessfully() {
         // When
         BidResponse bidResponse = bidService.placeBid(authentication, auction.getAuctionId(), bidRequest);
@@ -112,7 +121,7 @@ class BidServiceTest extends AbstractServiceTest {
     void testPlaceBid_shouldThrowExceptionWhenAuctionIsClosed() {
         // Given
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        auction.setStatus(AuctionStatus.CLOSED.name());
+        auction.setStatus("CLOSED");
         auctionRepository.save(auction);
 
         // When & Then
@@ -143,3 +152,4 @@ class BidServiceTest extends AbstractServiceTest {
         assertEquals(user.getUserId(), updatedAuction.getHighestBidUser().getUserId());
     }
 }
+

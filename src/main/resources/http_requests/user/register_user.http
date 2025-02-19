@@ -8,5 +8,5 @@ Authorization: Basic am9obl9kb2U6cGFzc3dvcmQxMjM=
   "password": "password123",
   "email": "jane_doe@auction.com",
   "fullName": "Jane Doe",
-  "roles": "admin"
+  "roles": ["admin"]
 }

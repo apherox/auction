@@ -9,6 +9,7 @@ import com.auction.exception.AuthenticationException;
 import com.auction.exception.BidCreationException;
 import com.auction.exception.InvalidBidException;
 import com.auction.exception.InvalidCredentialsException;
+import com.auction.exception.InvalidRoleException;
 import com.auction.exception.ResourceNotFoundException;
 import com.auction.exception.UserConflictException;
 import com.auction.exception.UserCreationException;
@@ -120,6 +121,13 @@ public class ControllerExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleInvalidCredentialsException(InvalidCredentialsException e) {
 		log.error("InvalidCredentialsException received, message: {}", e.getMessage());
 		return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.UNAUTHORIZED);
+	}
+
+	@ExceptionHandler(InvalidRoleException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseEntity<ErrorResponse> handleInvalidRoleException(InvalidRoleException e) {
+		log.error("InvalidRoleException received, message: {}", e.getMessage());
+		return new ResponseEntity<>(new ErrorResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(AuthenticationException.class)

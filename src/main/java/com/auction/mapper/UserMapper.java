@@ -2,46 +2,38 @@ package com.auction.mapper;
 
 import com.auction.api.model.user.UserRequest;
 import com.auction.api.model.user.UserResponse;
+import com.auction.model.Role;
 import com.auction.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 @Mapper
 public interface UserMapper {
 
     UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
-    @Mapping(target = "roles", source = "roles", qualifiedByName = "removeRolePrefix")
+    @Mapping(target = "roles", source = "roles", qualifiedByName = "rolesToRoleNames")
     UserResponse toUserApiModel(User userEntity);
 
-    @Named("removeRolePrefix")
-    default String removeRolePrefix(String roles) {
+    @Named("rolesToRoleNames")
+    default List<String> rolesToRoleNames(List<Role> roles) {
         if (roles == null || roles.isEmpty()) {
-            return "";
+            return new ArrayList<>();
         }
 
-        return Arrays.stream(roles.split(","))
-                .map(role -> role.replace("ROLE_", "").trim())
-                .collect(Collectors.joining(","));
+        return roles.stream()
+                .map(Role::getRoleName)
+                .toList();
     }
 
     @Mapping(target = "userId", ignore = true)
-    @Mapping(target = "roles", source = "roles", qualifiedByName = "convertToRolePrefix")
+    @Mapping(target = "roles", ignore = true)
     User toUserEntity(UserRequest userRequest);
-
-    @Named("convertToRolePrefix")
-    default String convertToRolePrefix(String roles) {
-        if (roles == null || roles.isEmpty()) {
-            return "";
-        }
-
-        return Arrays.stream(roles.split(","))
-                .map(role -> "ROLE_" + role.trim())
-                .collect(Collectors.joining(","));
-    }
 }
+
+

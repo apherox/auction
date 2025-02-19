@@ -2,13 +2,19 @@ package com.auction.api.controller;
 
 import com.auction.api.model.user.UserRequest;
 import com.auction.api.model.user.UserResponse;
+import com.auction.model.Role;
+import com.auction.repository.RoleRepository;
 import com.auction.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Collections;
+
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -27,7 +33,21 @@ class UserControllerTest extends AbstractControllerTest {
     private UserRepository userRepository;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setUp() {
+        Role adminRole = new Role();
+        adminRole.setRoleName("admin");
+        roleRepository.save(adminRole);
+
+        Role userRole = new Role();
+        userRole.setRoleName("user");
+        roleRepository.save(userRole);
+    }
 
     private UserRequest createValidUserRequest() {
         UserRequest userRequest = new UserRequest();
@@ -35,7 +55,7 @@ class UserControllerTest extends AbstractControllerTest {
         userRequest.setPassword("password123");
         userRequest.setEmail("john.doe@auction.com");
         userRequest.setFullName("John Doe");
-        userRequest.setRoles("user");
+        userRequest.setRoles(Collections.singletonList("user"));
         return userRequest;
     }
 
@@ -51,6 +71,11 @@ class UserControllerTest extends AbstractControllerTest {
                 )
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
+                .andExpect(jsonPath("$.username").value(userRequest.getUsername()))
+                .andExpect(jsonPath("$.email").value(userRequest.getEmail()))
+                .andExpect(jsonPath("$.fullName").value(userRequest.getFullName()))
+                .andExpect(jsonPath("$.roles").value(hasSize(1)))
+                .andExpect(jsonPath("$.roles[0]").value("user"))
                 .andDo(result -> {
                     String responseContent = result.getResponse().getContentAsString();
                     UserResponse createdUser = objectMapper.readValue(responseContent, UserResponse.class);
@@ -67,7 +92,7 @@ class UserControllerTest extends AbstractControllerTest {
         userRequest.setPassword("password123");
         userRequest.setEmail("john.doe@auction.com");
         userRequest.setFullName("John Doe");
-        userRequest.setRoles("user");
+        userRequest.setRoles(Collections.singletonList("user"));
 
         // Act
         mockMvc.perform(post("/v1/api/users")
@@ -84,7 +109,7 @@ class UserControllerTest extends AbstractControllerTest {
         userRequest.setPassword("password123");
         userRequest.setUsername("john_doe");
         userRequest.setFullName("John Doe");
-        userRequest.setRoles("user");
+        userRequest.setRoles(Collections.singletonList("user"));
 
         // Act
         mockMvc.perform(post("/v1/api/users")
@@ -102,7 +127,7 @@ class UserControllerTest extends AbstractControllerTest {
         userRequest.setEmail("john_doe_auction.com");
         userRequest.setUsername("john_doe");
         userRequest.setFullName("John Doe");
-        userRequest.setRoles("user");
+        userRequest.setRoles(Collections.singletonList("user"));
 
         // Act
         mockMvc.perform(post("/v1/api/users")
@@ -172,7 +197,7 @@ class UserControllerTest extends AbstractControllerTest {
         userWithDuplicateUsernameRequest.setPassword("password123");
         userWithDuplicateUsernameRequest.setEmail("johnny_doe@auction.com");
         userWithDuplicateUsernameRequest.setFullName("John Doe");
-        userWithDuplicateUsernameRequest.setRoles("user");
+        userWithDuplicateUsernameRequest.setRoles(Collections.singletonList("user"));
 
         mockMvc.perform(post("/v1/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -200,7 +225,7 @@ class UserControllerTest extends AbstractControllerTest {
         userWithDuplicateEmailRequest.setPassword("password123");
         userWithDuplicateEmailRequest.setEmail("john.doe@auction.com");
         userWithDuplicateEmailRequest.setFullName("John Doe");
-        userWithDuplicateEmailRequest.setRoles("user");
+        userWithDuplicateEmailRequest.setRoles(Collections.singletonList("user"));
 
         mockMvc.perform(post("/v1/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -224,11 +249,11 @@ class UserControllerTest extends AbstractControllerTest {
 
         // Act
         UserRequest userWithDuplicateEmailRequest = new UserRequest();
-        userWithDuplicateEmailRequest.setUsername("jim_carrey");
+        userWithDuplicateEmailRequest.setUsername("jimmy_carr");
         userWithDuplicateEmailRequest.setPassword("password123");
-        userWithDuplicateEmailRequest.setEmail("john.doe@auction.com");
-        userWithDuplicateEmailRequest.setFullName("John Doe");
-        userWithDuplicateEmailRequest.setRoles("invalid_role");
+        userWithDuplicateEmailRequest.setEmail("jimmy.carr@auction.com");
+        userWithDuplicateEmailRequest.setFullName("Jimmy Carr");
+        userWithDuplicateEmailRequest.setRoles(Collections.singletonList("invalid_role"));
 
         mockMvc.perform(post("/v1/api/users")
                         .contentType(MediaType.APPLICATION_JSON)

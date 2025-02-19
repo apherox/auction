@@ -49,6 +49,5 @@ public class LoginService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(("User with username '" + username + "' not found")));
         user.setLastLogin(LocalDateTime.now());
-        userRepository.save(user);
     }
 }

@@ -4,8 +4,10 @@ import com.auction.api.model.bid.BidRequest;
 import com.auction.api.model.bid.BidResponse;
 import com.auction.exception.InvalidBidException;
 import com.auction.model.Auction;
+import com.auction.model.Role;
 import com.auction.model.User;
 import com.auction.repository.AuctionRepository;
+import com.auction.repository.RoleRepository;
 import com.auction.repository.UserRepository;
 import jakarta.persistence.OptimisticLockException;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,11 +21,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -40,6 +44,9 @@ class OptimisticLockTest extends AbstractServiceTest {
     private UserRepository userRepository;
 
     @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
     private BidService bidService;
 
     @MockitoBean
@@ -50,12 +57,16 @@ class OptimisticLockTest extends AbstractServiceTest {
 
     @BeforeEach
     void setUp() {
+        Role userRole = new Role();
+        userRole.setRoleName("USER");
+        roleRepository.save(userRole);
+
         user = new User();
         user.setUsername("johndoe");
         user.setPassword("password123");
         user.setEmail("johndoe@example.com");
         user.setFullName("John Doe");
-        user.setRoles("USER");
+        user.setRoles(Collections.singletonList(userRole));
         userRepository.save(user);
 
         bidRequest = new BidRequest();
@@ -72,7 +83,7 @@ class OptimisticLockTest extends AbstractServiceTest {
         // Given
         Auction auction = mock(Auction.class);
 
-        when(auctionRepository.findById(any())).thenReturn(Optional.of(auction));
+        when(auctionRepository.findById(anyLong())).thenReturn(Optional.of(auction));
         when(auction.getAuctionId()).thenReturn(999L);
         when(auction.getHighestBid()).thenReturn(10.00);
         when(auction.getHighestBidUser()).thenReturn(user);
@@ -92,13 +103,12 @@ class OptimisticLockTest extends AbstractServiceTest {
         verify(auctionRepository, times(2)).save(any(Auction.class));
     }
 
-
     @Test
     void testPlaceBid_shouldThrowInvalidBidExceptionAfterRetriesExhausted() {
         // Given
         Auction auction = mock(Auction.class);
 
-        when(auctionRepository.findById(any())).thenReturn(Optional.of(auction));
+        when(auctionRepository.findById(anyLong())).thenReturn(Optional.of(auction));
         when(auction.getAuctionId()).thenReturn(999L);
         when(auction.getHighestBid()).thenReturn(10.00);
         when(auction.getHighestBidUser()).thenReturn(user);
@@ -108,7 +118,7 @@ class OptimisticLockTest extends AbstractServiceTest {
         // Simulate OptimisticLockException on all retry attempts
         doThrow(OptimisticLockException.class).when(auctionRepository).save(any(Auction.class));
 
-        // When / Then
+        // When & Then
         assertThrowsExactly(InvalidBidException.class,
                 () -> bidService.placeBid(authentication, auction.getAuctionId(), bidRequest)
         );
@@ -122,7 +132,7 @@ class OptimisticLockTest extends AbstractServiceTest {
         // Given
         Auction auction = mock(Auction.class);
 
-        when(auctionRepository.findById(any())).thenReturn(Optional.of(auction));
+        when(auctionRepository.findById(anyLong())).thenReturn(Optional.of(auction));
         when(auction.getAuctionId()).thenReturn(999L);
         when(auction.getHighestBid()).thenReturn(10.00);
         when(auction.getHighestBidUser()).thenReturn(user);
@@ -146,7 +156,7 @@ class OptimisticLockTest extends AbstractServiceTest {
         // Given
         Auction auction = mock(Auction.class);
 
-        when(auctionRepository.findById(any())).thenReturn(Optional.of(auction));
+        when(auctionRepository.findById(anyLong())).thenReturn(Optional.of(auction));
         when(auction.getAuctionId()).thenReturn(999L);
         when(auction.getHighestBid()).thenReturn(10000.00);
         when(auction.getExpirationTime()).thenReturn(LocalDateTime.now().plusDays(3));
@@ -155,7 +165,7 @@ class OptimisticLockTest extends AbstractServiceTest {
         // Bid amount lower than current highest bid
         bidRequest.setAmount(5000.00);
 
-        // When / Then
+        // When & Then
         assertThrowsExactly(InvalidBidException.class,
                 () -> bidService.placeBid(authentication, auction.getAuctionId(), bidRequest)
         );
@@ -163,3 +173,4 @@ class OptimisticLockTest extends AbstractServiceTest {
         verify(auctionRepository, never()).save(any(Auction.class));
     }
 }
+

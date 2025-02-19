@@ -13,6 +13,11 @@ public class SequenceService {
     private final EntityManager entityManager;
 
     @Transactional
+    public void resetRoleSequence() {
+        this.resetSequence("ROLE_ID_SEQ", 10);
+    }
+
+    @Transactional
     public void resetUserSequence() {
         this.resetSequence("USER_ID_SEQ", 10);
     }
