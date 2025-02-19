@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface AuctionRepository extends JpaRepository<Auction, Long> {
 
     @Override
-    @Lock(LockModeType.OPTIMISTIC_FORCE_INCREMENT)
+    @Lock(LockModeType.OPTIMISTIC)
     Optional<Auction> findById(Long id);
 
     @Query("SELECT a FROM Auction a WHERE a.expirationTime < :now AND a.status != 'CLOSED'")

@@ -16,6 +16,7 @@ import com.auction.repository.AuctionRepository;
 import com.auction.repository.BidRepository;
 import com.auction.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -45,7 +46,6 @@ public class BidService {
     @Transactional
     public BidResponse placeBid(final Authentication authentication,
                                 final Long auctionId, final BidRequest bidRequest) {
-
         String username = getUsernameFromAuthentication(authentication);
         Auction auction = getAuctionById(auctionId);
         User user = getUserByUsername(username);
@@ -53,10 +53,21 @@ public class BidService {
         validateAuctionStatus(auction);
         validateBidAmount(auction, bidRequest);
 
-        Bid savedBid = saveBid(bidRequest, auction, user);
-        updateAuctionWithHighestBid(auction, bidRequest, user);
-
-        return bidMapper.toBidApiModel(savedBid);
+        int retryAttempts = 3;
+        while (retryAttempts > 0) {
+            try {
+                Bid savedBid = saveBid(bidRequest, auction, user);
+                updateAuctionWithHighestBid(auction, bidRequest, user);
+                return bidMapper.toBidApiModel(savedBid);
+            } catch (OptimisticLockException e) {
+                retryAttempts--;
+                if (retryAttempts == 0) {
+                    throw new InvalidBidException("Failed to place bid due to concurrent modifications. Please try again.");
+                }
+                auction = getAuctionById(auctionId);
+            }
+        }
+        throw new InvalidBidException("Failed to place bid after multiple attempts.");
     }
 
     private String getUsernameFromAuthentication(Authentication authentication) {
@@ -94,6 +105,14 @@ public class BidService {
 
     private void validateBidAmount(Auction auction, BidRequest bidRequest) {
         Double highestBid = auction.getHighestBid();
+        Double startingPrice = auction.getStartingPrice();
+
+        if (highestBid == null && bidRequest.getAmount().compareTo(startingPrice) < 0) {
+            throw new InvalidBidException(
+                    String.format("Bid amount %s must be greater than or equal to the starting price %s",
+                            bidRequest.getAmount(), startingPrice));
+        }
+
         if (highestBid != null && bidRequest.getAmount().compareTo(highestBid) <= 0) {
             throw new InvalidBidException(
                     String.format("Bid amount %s must be higher than the current highest bid amount %s",
